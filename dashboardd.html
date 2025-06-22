@@ -1,0 +1,762 @@
+<html lang="en" class="scroll-smooth" >
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Professional Responsive Dashboard with To-Do List</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    // Enable dark mode class strategy for Tailwind
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {},
+      },
+      variants: {},
+      plugins: [],
+    }
+  </script>
+  <link
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+    rel="stylesheet"
+  />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    body, html {
+      font-family: 'Inter', sans-serif;
+      background: #f9fafb;
+      color: #1f2937;
+      height: 100vh;
+      margin: 0;
+      overflow: hidden;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+    /* Scrollbar thin */
+    .scrollbar-thin {
+      scrollbar-width: thin;
+      scrollbar-color: rgba(37, 99, 235, 0.3) transparent;
+    }
+    .scrollbar-thin::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .scrollbar-thin::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .scrollbar-thin::-webkit-scrollbar-thumb {
+      background-color: rgba(37, 99, 235, 0.3);
+      border-radius: 3px;
+    }
+    /* Visually hidden for accessibility */
+    .sr-only {
+      position: absolute !important;
+      width: 1px !important;
+      height: 1px !important;
+      padding: 0 !important;
+      margin: -1px !important;
+      overflow: hidden !important;
+      clip: rect(0,0,0,0) !important;
+      white-space: nowrap !important;
+      border: 0 !important;
+    }
+  </style>
+</head>
+<body class="flex h-screen overflow-hidden bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-gray-100 transition-colors duration-300">
+  <aside id="sidebar" aria-label="Sidebar navigation" class="bg-white dark:bg-gray-800 rounded-2xl shadow-md w-72 min-w-[18rem] flex flex-col border border-gray-200 dark:border-gray-700 flex-shrink-0 transition-colors duration-300">
+    <div class="text-blue-600 dark:text-blue-400 uppercase font-extrabold text-2xl tracking-widest select-none px-7 py-7 border-b border-gray-200 dark:border-gray-700">Dashboard</div>
+    <nav class="mt-6 flex flex-col gap-2 flex-grow px-6">
+      <button id="nav-dashboard" class="nav-btn flex items-center gap-4 px-4 py-3 text-lg font-semibold text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-xl shadow-inner border border-transparent select-none transition-colors duration-300 active:bg-blue-600 active:text-white active:shadow-inner active:border-blue-700 hover:bg-blue-600 hover:text-white hover:shadow-inner hover:border-blue-700" aria-current="page" aria-label="Dashboard navigation">
+        <i class="fas fa-tachometer-alt w-6 text-center" aria-hidden="true"></i> Dashboard
+      </button>
+      <button id="nav-members" class="nav-btn flex items-center gap-4 px-4 py-3 text-lg font-semibold text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-xl shadow-inner border border-transparent select-none transition-colors duration-300 hover:bg-blue-600 hover:text-white hover:shadow-inner hover:border-blue-700" aria-label="Members navigation">
+        <i class="fas fa-users w-6 text-center" aria-hidden="true"></i> Members
+      </button>
+      <button id="logoutBtn" type="button" aria-label="Logout" class="flex items-center gap-4 px-6 py-3 mt-6 font-semibold text-red-600 bg-red-50 dark:bg-red-900 rounded-xl cursor-pointer select-none transition-colors duration-300 border border-transparent justify-center hover:bg-red-700 hover:text-white hover:border-red-800 hover:shadow-lg">
+        <i class="fas fa-sign-out-alt w-6 text-center text-red-600 dark:text-red-400"></i>
+        <span>Logout</span>
+      </button>
+    </nav>
+    <div class="text-gray-400 dark:text-gray-500 text-xs select-none text-center py-6 border-t border-gray-200 dark:border-gray-700">&copy; 2024 Your Company</div>
+  </aside>
+
+  <div id="main-container" role="main" aria-live="polite" class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg flex-grow flex flex-col overflow-hidden transition-colors duration-300 relative p-0">
+    <header class="h-18 border-b border-gray-200 dark:border-gray-700 px-8 flex items-center justify-between rounded-t-2xl bg-gray-50 dark:bg-gray-900 select-none">
+      <h1 id="greeting" class="text-blue-600 dark:text-blue-400 font-extrabold text-xl tracking-wide">Welcome, User</h1>
+      <div class="flex items-center gap-6 text-gray-700 dark:text-gray-300">
+        <button id="darkModeToggle" aria-label="Toggle dark mode" title="Toggle dark mode" class="icon-btn p-2 rounded-full text-blue-600 dark:text-yellow-400 text-xl flex items-center justify-center border border-transparent bg-transparent transition-colors duration-300 hover:bg-blue-600 hover:text-white hover:shadow-lg dark:hover:bg-yellow-400 dark:hover:text-gray-900">
+          <i class="fas fa-moon" aria-hidden="true"></i>
+          <i class="fas fa-sun" aria-hidden="true" style="display:none; color:#fbbf24;"></i>
+        </button>
+        <div id="profileDropdownWrapper" class="relative">
+          <button id="profileBtn" aria-haspopup="true" aria-expanded="false" aria-label="User profile menu" class="flex items-center gap-3 rounded-full bg-blue-600 dark:bg-blue-700 text-white font-semibold text-base px-4 py-2 cursor-pointer select-none shadow-md transition-colors duration-300 hover:bg-blue-800 hover:shadow-lg">
+            <div id="userAvatar" aria-hidden="true" class="w-10 h-10 rounded-full bg-blue-800 dark:bg-blue-900 flex items-center justify-center font-bold text-lg shadow-md transition-colors duration-300">JD</div>
+            <i class="fas fa-chevron-down" aria-hidden="true"></i>
+          </button>
+          <div id="profileDropdown" role="menu" aria-orientation="vertical" aria-labelledby="profileBtn" class="absolute right-0 mt-3 w-56 bg-white dark:bg-gray-700 rounded-xl shadow-lg py-2 z-20 hidden text-gray-700 dark:text-gray-300 transition-colors duration-300">
+            <a href="#" role="menuitem" tabindex="-1" class="block px-6 py-3 hover:bg-blue-600 hover:text-white dark:hover:bg-blue-500 dark:hover:text-white select-none">Profile</a>
+            <a href="#" role="menuitem" tabindex="-1" class="block px-6 py-3 hover:bg-blue-600 hover:text-white dark:hover:bg-blue-500 dark:hover:text-white select-none">Settings</a>
+            <a href="#" role="menuitem" tabindex="-1" class="block px-6 py-3 hover:bg-blue-600 hover:text-white dark:hover:bg-blue-500 dark:hover:text-white select-none">Logout</a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="flex-grow overflow-y-auto bg-gray-50 dark:bg-gray-900 rounded-b-2xl p-8 flex flex-col relative">
+      <section id="dashboardView" aria-label="Dashboard Home View" class="flex flex-col">
+        <h2 class="text-4xl font-extrabold text-blue-600 dark:text-blue-400 select-none mb-6 tracking-wide">Dashboard</h2>
+        <p class="text-gray-500 dark:text-gray-300 max-w-3xl select-text text-lg leading-relaxed">This is your dashboard home. Use the sidebar to navigate to the Members section to manage your to-do list.</p>
+      </section>
+
+      <section id="membersView" aria-label="Members To-Do List" tabindex="0" class="hidden flex-col h-full">
+        <div class="flex flex-wrap items-center gap-6 mb-6">
+          <h2 class="text-4xl font-extrabold text-blue-600 dark:text-blue-400 select-none tracking-wide">Members - To-Do List</h2>
+          <button id="addTaskBtn" aria-label="Add new task" class="ml-4 flex items-center gap-2 bg-blue-600 dark:bg-blue-700 text-white font-extrabold text-base rounded-full px-5 py-2 shadow-md transition-colors duration-300 hover:bg-blue-800 hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-600">
+            <i class="fas fa-plus" aria-hidden="true"></i> Add Task
+          </button>
+          <button id="deleteSelectedBtn" aria-label="Delete selected tasks" title="Delete selected tasks" class="ml-4 flex items-center gap-2 bg-red-500 dark:bg-red-700 text-white font-extrabold text-base rounded-full px-5 py-2 shadow-md transition-opacity duration-300 opacity-0 pointer-events-none hover:bg-red-700 dark:hover:bg-red-900 hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-red-300 dark:focus:ring-red-600">
+            <i class="fas fa-trash-alt" aria-hidden="true"></i> Delete Selected
+          </button>
+        </div>
+        <input id="searchInput" type="search" placeholder="Search tasks, user emails..." aria-label="Search tasks" class="w-full max-w-lg px-4 py-2 rounded-full border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-base shadow-inner focus:outline-none focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-600 focus:border-blue-600 dark:focus:border-blue-500 mb-6" />
+        <div class="table-container scrollbar-thin flex-grow overflow-y-auto border-2 border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 shadow-sm" tabindex="0" aria-live="polite" aria-relevant="additions removals">
+          <table role="grid" aria-describedby="taskTableDesc" aria-label="To-Do List Tasks" class="w-full border-collapse table-fixed text-gray-700 dark:text-gray-300 text-base">
+            <caption id="taskTableDesc" class="sr-only">List of tasks with user email, login time, deadline, and actions</caption>
+            <thead class="bg-blue-600 dark:bg-blue-700 text-white select-none">
+              <tr>
+                <th scope="col" class="w-12 text-center p-3 border-r border-blue-500 dark:border-blue-600">
+                  <input type="checkbox" id="selectAllCheckbox" aria-label="Select all tasks" class="cursor-pointer w-5 h-5 accent-blue-600" />
+                </th>
+                <th scope="col" tabindex="0" role="button" aria-pressed="false" data-sort-key="taskName" aria-label="Sort by Task Name" class="p-3 font-extrabold text-left border-r border-blue-500 dark:border-blue-600 truncate cursor-pointer select-none">
+                  Task Name <i class="fas fa-sort ml-2 text-blue-200 dark:text-blue-300 text-sm align-middle"></i>
+                </th>
+                <th scope="col" tabindex="0" role="button" aria-pressed="false" data-sort-key="userEmail" aria-label="Sort by User Email" class="p-3 font-extrabold text-left border-r border-blue-500 dark:border-blue-600 truncate cursor-pointer select-none">
+                  User Email <i class="fas fa-sort ml-2 text-blue-200 dark:text-blue-300 text-sm align-middle"></i>
+                </th>
+                <th scope="col" tabindex="0" role="button" aria-pressed="false" data-sort-key="loginTime" aria-label="Sort by Login Time" class="p-3 font-extrabold text-left border-r border-blue-500 dark:border-blue-600 truncate cursor-pointer select-none">
+                  Login Time <i class="fas fa-sort ml-2 text-blue-200 dark:text-blue-300 text-sm align-middle"></i>
+                </th>
+                <th scope="col" tabindex="0" role="button" aria-pressed="false" data-sort-key="deadline" aria-label="Sort by Deadline" class="p-3 font-extrabold text-left border-r border-blue-500 dark:border-blue-600 truncate cursor-pointer select-none">
+                  Deadline <i class="fas fa-sort ml-2 text-blue-200 dark:text-blue-300 text-sm align-middle"></i>
+                </th>
+                <th scope="col" class="w-28 text-center p-3 select-none">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="taskTableBody" class="divide-y divide-gray-200 dark:divide-gray-700"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Edit Modal -->
+  <div id="editModal" class="modal-overlay fixed inset-0 bg-blue-100 bg-opacity-20 dark:bg-gray-900 dark:bg-opacity-70 backdrop-blur-sm flex items-center justify-center z-40 opacity-0 pointer-events-none transition-opacity duration-300" role="dialog" aria-modal="true" aria-labelledby="editModalTitle" tabindex="-1">
+    <div class="modal-content bg-white dark:bg-gray-800 rounded-2xl shadow-lg max-w-md w-full p-10 relative transition-colors duration-300">
+      <h3 id="editModalTitle" class="text-blue-600 dark:text-blue-400 font-extrabold text-2xl mb-6 tracking-wide">Edit Task</h3>
+      <form id="editForm" novalidate class="flex flex-col">
+        <label for="editTaskName" class="block font-semibold text-gray-700 dark:text-gray-300 mb-2">Task Name</label>
+        <input type="text" id="editTaskName" name="taskName" required autocomplete="off" class="mb-6 px-4 py-3 rounded-xl border-2 border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-base shadow-inner focus:outline-none focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-600 focus:border-blue-600 dark:focus:border-blue-500" />
+        <label class="block font-semibold text-gray-700 dark:text-gray-300 mb-2">User Email</label>
+        <div id="editUserEmailDisplay" class="readonly-email mb-6 px-4 py-3 rounded-xl bg-blue-100 dark:bg-blue-900 border-2 border-blue-300 dark:border-blue-700 text-blue-800 dark:text-blue-300 font-semibold select-text shadow-inner" aria-live="polite" aria-atomic="true"></div>
+        <label for="editLoginTime" class="block font-semibold text-gray-700 dark:text-gray-300 mb-2">Login Time</label>
+        <input type="time" id="editLoginTime" name="loginTime" required class="mb-6 px-4 py-3 rounded-xl border-2 border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-base shadow-inner focus:outline-none focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-600 focus:border-blue-600 dark:focus:border-blue-500" />
+        <label for="editDeadline" class="block font-semibold text-gray-700 dark:text-gray-300 mb-2">Deadline</label>
+        <input type="date" id="editDeadline" name="deadline" required class="mb-6 px-4 py-3 rounded-xl border-2 border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-base shadow-inner focus:outline-none focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-600 focus:border-blue-600 dark:focus:border-blue-500" />
+        <div class="modal-buttons flex justify-end gap-4 mt-4">
+          <button type="button" id="cancelEditBtn" class="btn-cancel rounded-full font-extrabold text-base px-6 py-3 bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 shadow-md transition-colors duration-300 hover:bg-gray-300 dark:hover:bg-gray-600 hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600">Cancel</button>
+          <button type="submit" class="btn-save rounded-full font-extrabold text-base px-6 py-3 bg-blue-600 dark:bg-blue-700 text-white shadow-lg transition-colors duration-300 hover:bg-blue-800 dark:hover:bg-blue-900 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-blue-400 dark:focus:ring-blue-600">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Add Task Modal -->
+  <div id="addTaskModal" class="modal-overlay fixed inset-0 bg-blue-100 bg-opacity-20 dark:bg-gray-900 dark:bg-opacity-70 backdrop-blur-sm flex items-center justify-center z-40 opacity-0 pointer-events-none transition-opacity duration-300" role="dialog" aria-modal="true" aria-labelledby="addTaskModalTitle" tabindex="-1">
+    <div class="modal-content bg-white dark:bg-gray-800 rounded-2xl shadow-lg max-w-md w-full p-10 relative transition-colors duration-300">
+      <h3 id="addTaskModalTitle" class="text-blue-600 dark:text-blue-400 font-extrabold text-2xl mb-6 tracking-wide">Add New Task</h3>
+      <form id="addTaskForm" novalidate class="flex flex-col">
+        <label for="addTaskName" class="block font-semibold text-gray-700 dark:text-gray-300 mb-2">Task Name</label>
+        <input type="text" id="addTaskName" name="taskName" placeholder="Enter task name" required autocomplete="off" class="mb-6 px-4 py-3 rounded-xl border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-base shadow-inner focus:outline-none focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-600 focus:border-blue-600 dark:focus:border-blue-500" />
+        <label class="block font-semibold text-gray-700 dark:text-gray-300 mb-2">User Email</label>
+        <div id="addUserEmailDisplay" class="readonly-email mb-6 px-4 py-3 rounded-xl bg-blue-100 dark:bg-blue-900 border-2 border-blue-300 dark:border-blue-700 text-blue-800 dark:text-blue-300 font-semibold select-text shadow-inner" aria-live="polite" aria-atomic="true"></div>
+        <label for="addLoginTime" class="block font-semibold text-gray-700 dark:text-gray-300 mb-2">Login Time</label>
+        <input type="time" id="addLoginTime" name="loginTime" required class="mb-6 px-4 py-3 rounded-xl border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-base shadow-inner focus:outline-none focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-600 focus:border-blue-600 dark:focus:border-blue-500" />
+        <label for="addDeadline" class="block font-semibold text-gray-700 dark:text-gray-300 mb-2">Deadline</label>
+        <input type="date" id="addDeadline" name="deadline" required class="mb-6 px-4 py-3 rounded-xl border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-base shadow-inner focus:outline-none focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-600 focus:border-blue-600 dark:focus:border-blue-500" />
+        <div class="modal-buttons flex justify-end gap-4 mt-4">
+          <button type="button" id="cancelAddBtn" class="btn-cancel rounded-full font-extrabold text-base px-6 py-3 bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 shadow-md transition-colors duration-300 hover:bg-gray-300 dark:hover:bg-gray-600 hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600">Cancel</button>
+          <button type="submit" class="btn-save rounded-full font-extrabold text-base px-6 py-3 bg-blue-600 dark:bg-blue-700 text-white shadow-lg transition-colors duration-300 hover:bg-blue-800 dark:hover:bg-blue-900 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-blue-400 dark:focus:ring-blue-600">Add</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    (() => {
+      // Elements
+      const navDashboardBtn = document.getElementById("nav-dashboard");
+      const navMembersBtn = document.getElementById("nav-members");
+      const dashboardView = document.getElementById("dashboardView");
+      const membersView = document.getElementById("membersView");
+      const greetingEl = document.getElementById("greeting");
+      const darkModeToggle = document.getElementById("darkModeToggle");
+      const bodyEl = document.body;
+      const mainContainer = document.getElementById("main-container");
+      const sidebar = document.getElementById("sidebar");
+      const profileBtn = document.getElementById("profileBtn");
+      const profileDropdown = document.getElementById("profileDropdown");
+      const profileDropdownWrapper = document.getElementById("profileDropdownWrapper");
+      const userAvatar = document.getElementById("userAvatar");
+      const logoutBtn = document.getElementById("logoutBtn");
+
+      // To-Do List Elements
+      const taskTableBody = document.getElementById("taskTableBody");
+      const selectAllCheckbox = document.getElementById("selectAllCheckbox");
+      const searchInput = document.getElementById("searchInput");
+      const addTaskBtn = document.getElementById("addTaskBtn");
+      const deleteSelectedBtn = document.getElementById("deleteSelectedBtn");
+
+      // Edit Modal Elements
+      const editModal = document.getElementById("editModal");
+      const editForm = document.getElementById("editForm");
+      const cancelEditBtn = document.getElementById("cancelEditBtn");
+      const editTaskNameInput = document.getElementById("editTaskName");
+      const editUserEmailDisplay = document.getElementById("editUserEmailDisplay");
+      const editLoginTimeInput = document.getElementById("editLoginTime");
+      const editDeadlineInput = document.getElementById("editDeadline");
+
+      // Add Modal Elements
+      const addTaskModal = document.getElementById("addTaskModal");
+      const addTaskForm = document.getElementById("addTaskForm");
+      const cancelAddBtn = document.getElementById("cancelAddBtn");
+      const addTaskNameInput = document.getElementById("addTaskName");
+      const addUserEmailDisplay = document.getElementById("addUserEmailDisplay");
+      const addLoginTimeInput = document.getElementById("addLoginTime");
+      const addDeadlineInput = document.getElementById("addDeadline");
+
+      // State
+      let currentUserName = "John Doe";
+      let currentUserEmail = "john.doe";
+      let tasks = [];
+      let filteredTasks = [];
+      let currentSort = { key: null, asc: true };
+      let editingTaskId = null;
+
+      // Utility: Generate initials from name
+      function getInitials(name) {
+        const parts = name.trim().split(" ");
+        if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
+        return (
+          parts[0].charAt(0).toUpperCase() + parts[parts.length - 1].charAt(0).toUpperCase()
+        );
+      }
+
+      // Load data from localStorage
+      function loadData() {
+        const savedTasks = localStorage.getItem("todoTasks");
+        if (savedTasks) {
+          try {
+            tasks = JSON.parse(savedTasks);
+          } catch {
+            tasks = [];
+          }
+        } else {
+          // Sample initial data
+          tasks = [
+            {
+              id: crypto.randomUUID(),
+              taskName: "Finish project report",
+              userEmail: "alice",
+              loginTime: "09:30",
+              deadline: "2024-06-15",
+              selected: false,
+            },
+            {
+              id: crypto.randomUUID(),
+              taskName: "Update website content",
+              userEmail: "bob",
+              loginTime: "10:15",
+              deadline: "2024-06-20",
+              selected: false,
+            },
+            {
+              id: crypto.randomUUID(),
+              taskName: "Prepare presentation slides",
+              userEmail: "carol",
+              loginTime: "08:45",
+              deadline: "2024-06-18",
+              selected: false,
+            },
+            {
+              id: crypto.randomUUID(),
+              taskName: "Schedule team meeting",
+              userEmail: "dave",
+              loginTime: "11:00",
+              deadline: "2024-06-22",
+              selected: false,
+            },
+            {
+              id: crypto.randomUUID(),
+              taskName: "Review budget proposal",
+              userEmail: "eve",
+              loginTime: "09:00",
+              deadline: "2024-06-19",
+              selected: false,
+            },
+          ];
+          saveData();
+        }
+      }
+
+      // Save data to localStorage
+      function saveData() {
+        localStorage.setItem("todoTasks", JSON.stringify(tasks));
+      }
+
+      // Render user avatar initials
+      function renderUserAvatar() {
+        userAvatar.textContent = getInitials(currentUserName);
+      }
+
+      // Render greeting
+      function renderGreeting() {
+        greetingEl.textContent = `Welcome, ${currentUserName}`;
+      }
+
+      // Render tasks table rows
+      function renderTasks() {
+        // Filter tasks by search
+        const searchTerm = searchInput.value.trim().toLowerCase();
+        filteredTasks = tasks.filter((task) => {
+          return (
+            task.taskName.toLowerCase().includes(searchTerm) ||
+            task.userEmail.toLowerCase().includes(searchTerm) ||
+            task.loginTime.toLowerCase().includes(searchTerm) ||
+            task.deadline.toLowerCase().includes(searchTerm)
+          );
+        });
+
+        // Sort tasks if sorting is active
+        if (currentSort.key) {
+          filteredTasks.sort((a, b) => {
+            let valA = a[currentSort.key];
+            let valB = b[currentSort.key];
+            if (valA < valB) return currentSort.asc ? -1 : 1;
+            if (valA > valB) return currentSort.asc ? 1 : -1;
+            return 0;
+          });
+        }
+
+        // Clear table body
+        taskTableBody.innerHTML = "";
+
+        if (filteredTasks.length === 0) {
+          const tr = document.createElement("tr");
+          const td = document.createElement("td");
+          td.colSpan = 6;
+          td.className = "text-center py-16 text-blue-600 dark:text-blue-400 font-semibold";
+          td.textContent = "No tasks found.";
+          tr.appendChild(td);
+          taskTableBody.appendChild(tr);
+          updateDeleteSelectedBtn();
+          return;
+        }
+
+        filteredTasks.forEach((task) => {
+          const tr = document.createElement("tr");
+          tr.className = "transition-colors duration-150 cursor-default border-b border-gray-200 dark:border-gray-700 hover:bg-blue-50 dark:hover:bg-blue-900";
+
+          // Checkbox cell
+          const tdCheckbox = document.createElement("td");
+          tdCheckbox.className = "p-3 text-center";
+          const checkbox = document.createElement("input");
+          checkbox.type = "checkbox";
+          checkbox.checked = task.selected || false;
+          checkbox.setAttribute("aria-label", `Select task ${task.taskName}`);
+          checkbox.className = "cursor-pointer w-5 h-5 accent-blue-600";
+          checkbox.addEventListener("change", () => {
+            task.selected = checkbox.checked;
+            updateSelectAllCheckbox();
+            updateDeleteSelectedBtn();
+            saveData();
+          });
+          tdCheckbox.appendChild(checkbox);
+          tr.appendChild(tdCheckbox);
+
+          // Task Name
+          const tdTaskName = document.createElement("td");
+          tdTaskName.className = "p-3 font-semibold truncate max-w-[14rem]";
+          tdTaskName.textContent = task.taskName;
+          tr.appendChild(tdTaskName);
+
+          // User Email
+          const tdUserEmail = document.createElement("td");
+          tdUserEmail.className = "p-3 truncate max-w-[16rem] font-semibold text-blue-600 dark:text-blue-400";
+          tdUserEmail.textContent = task.userEmail;
+          tr.appendChild(tdUserEmail);
+
+          // Login Time
+          const tdLoginTime = document.createElement("td");
+          tdLoginTime.className = "p-3";
+          tdLoginTime.textContent = task.loginTime;
+          tr.appendChild(tdLoginTime);
+
+          // Deadline
+          const tdDeadline = document.createElement("td");
+          tdDeadline.className = "p-3";
+          tdDeadline.textContent = task.deadline;
+          tr.appendChild(tdDeadline);
+
+          // Actions
+          const tdActions = document.createElement("td");
+          tdActions.className = "p-3 text-center";
+
+          // Edit button
+          const editBtn = document.createElement("button");
+          editBtn.className = "text-blue-600 dark:text-blue-400 mx-1 text-xl transition-colors duration-300 hover:text-blue-800 dark:hover:text-blue-300";
+          editBtn.title = `Edit task ${task.taskName}`;
+          editBtn.innerHTML = '<i class="fas fa-edit"></i>';
+          editBtn.addEventListener("click", () => openEditModal(task.id));
+          tdActions.appendChild(editBtn);
+
+          // Delete button
+          const deleteBtn = document.createElement("button");
+          deleteBtn.className = "text-red-500 dark:text-red-400 mx-1 text-xl transition-colors duration-300 hover:text-red-700 dark:hover:text-red-600";
+          deleteBtn.title = `Delete task ${task.taskName}`;
+          deleteBtn.innerHTML = '<i class="fas fa-trash-alt"></i>';
+          deleteBtn.addEventListener("click", () => deleteTask(task.id));
+          tdActions.appendChild(deleteBtn);
+
+          tr.appendChild(tdActions);
+
+          taskTableBody.appendChild(tr);
+        });
+        updateDeleteSelectedBtn();
+      }
+
+      // Update select all checkbox state
+      function updateSelectAllCheckbox() {
+        if (tasks.length === 0) {
+          selectAllCheckbox.checked = false;
+          selectAllCheckbox.indeterminate = false;
+          return;
+        }
+        const selectedCount = tasks.filter((t) => t.selected).length;
+        if (selectedCount === 0) {
+          selectAllCheckbox.checked = false;
+          selectAllCheckbox.indeterminate = false;
+        } else if (selectedCount === tasks.length) {
+          selectAllCheckbox.checked = true;
+          selectAllCheckbox.indeterminate = false;
+        } else {
+          selectAllCheckbox.checked = false;
+          selectAllCheckbox.indeterminate = true;
+        }
+      }
+
+      // Select or deselect all tasks
+      function toggleSelectAll(checked) {
+        tasks.forEach((task) => {
+          task.selected = checked;
+        });
+        saveData();
+        renderTasks();
+      }
+
+      // Update Delete Selected button visibility
+      function updateDeleteSelectedBtn() {
+        const selectedCount = tasks.filter(t => t.selected).length;
+        if (selectedCount > 0) {
+          deleteSelectedBtn.classList.add("opacity-100", "pointer-events-auto");
+          deleteSelectedBtn.classList.remove("opacity-0", "pointer-events-none");
+          deleteSelectedBtn.setAttribute("aria-label", `Delete ${selectedCount} selected tasks`);
+        } else {
+          deleteSelectedBtn.classList.remove("opacity-100", "pointer-events-auto");
+          deleteSelectedBtn.classList.add("opacity-0", "pointer-events-none");
+          deleteSelectedBtn.removeAttribute("aria-label");
+        }
+      }
+
+      // Delete task by id
+      function deleteTask(id) {
+        if (!confirm("Are you sure you want to delete this task?")) return;
+        tasks = tasks.filter((task) => task.id !== id);
+        saveData();
+        renderTasks();
+        updateSelectAllCheckbox();
+      }
+
+      // Delete all selected tasks
+      function deleteSelectedTasks() {
+        if (!confirm("Are you sure you want to delete all selected tasks?")) return;
+        tasks = tasks.filter(task => !task.selected);
+        saveData();
+        renderTasks();
+        updateSelectAllCheckbox();
+      }
+
+      // Open edit modal with task data
+      function openEditModal(id) {
+        editingTaskId = id;
+        const task = tasks.find((t) => t.id === id);
+        if (!task) return;
+        editTaskNameInput.value = task.taskName;
+        editUserEmailDisplay.textContent = task.userEmail;
+        editLoginTimeInput.value = task.loginTime;
+        editDeadlineInput.value = task.deadline;
+        showModal(editModal);
+        editTaskNameInput.focus();
+      }
+
+      // Close edit modal
+      function closeEditModal() {
+        editingTaskId = null;
+        hideModal(editModal);
+        editForm.reset();
+      }
+
+      // Save edited task
+      function saveEditedTask(e) {
+        e.preventDefault();
+        if (!editingTaskId) return;
+        const task = tasks.find((t) => t.id === editingTaskId);
+        if (!task) return;
+        task.taskName = editTaskNameInput.value.trim();
+        // userEmail remains unchanged
+        task.loginTime = editLoginTimeInput.value;
+        task.deadline = editDeadlineInput.value;
+        saveData();
+        renderTasks();
+        updateSelectAllCheckbox();
+        closeEditModal();
+      }
+
+      // Open add task modal
+      function openAddTaskModal() {
+        showModal(addTaskModal);
+        addTaskForm.reset();
+        addUserEmailDisplay.textContent = currentUserEmail;
+        addTaskNameInput.focus();
+      }
+
+      // Close add task modal
+      function closeAddTaskModal() {
+        hideModal(addTaskModal);
+        addTaskForm.reset();
+      }
+
+      // Save new task
+      function saveNewTask(e) {
+        e.preventDefault();
+        const newTaskName = addTaskNameInput.value.trim();
+        const newLoginTime = addLoginTimeInput.value;
+        const newDeadline = addDeadlineInput.value;
+        if (!newTaskName || !newLoginTime || !newDeadline) return;
+
+        const newTask = {
+          id: crypto.randomUUID(),
+          taskName: newTaskName,
+          userEmail: currentUserEmail,
+          loginTime: newLoginTime,
+          deadline: newDeadline,
+          selected: false,
+        };
+        tasks.push(newTask);
+        saveData();
+        renderTasks();
+        updateSelectAllCheckbox();
+        closeAddTaskModal();
+      }
+
+      // Show modal
+      function showModal(modal) {
+        modal.classList.add("opacity-100");
+        modal.classList.remove("opacity-0", "pointer-events-none");
+        modal.style.display = "flex";
+        modal.setAttribute("aria-hidden", "false");
+      }
+      // Hide modal
+      function hideModal(modal) {
+        modal.classList.remove("opacity-100");
+        modal.classList.add("opacity-0", "pointer-events-none");
+        modal.style.display = "none";
+        modal.setAttribute("aria-hidden", "true");
+      }
+
+      // Switch views
+      function switchView(view) {
+        if (view === "dashboard") {
+          dashboardView.classList.remove("hidden");
+          membersView.classList.add("hidden");
+          navDashboardBtn.classList.add("active", "bg-blue-600", "text-white", "shadow-inner", "border-blue-700");
+          navDashboardBtn.setAttribute("aria-current", "page");
+          navMembersBtn.classList.remove("active", "bg-blue-600", "text-white", "shadow-inner", "border-blue-700");
+          navMembersBtn.removeAttribute("aria-current");
+        } else if (view === "members") {
+          dashboardView.classList.add("hidden");
+          membersView.classList.remove("hidden");
+          navMembersBtn.classList.add("active", "bg-blue-600", "text-white", "shadow-inner", "border-blue-700");
+          navMembersBtn.setAttribute("aria-current", "page");
+          navDashboardBtn.classList.remove("active", "bg-blue-600", "text-white", "shadow-inner", "border-blue-700");
+          navDashboardBtn.removeAttribute("aria-current");
+          renderTasks();
+          updateSelectAllCheckbox();
+        }
+      }
+
+      // Sort tasks by key
+      function sortTasksBy(key) {
+        if (currentSort.key === key) {
+          currentSort.asc = !currentSort.asc;
+        } else {
+          currentSort.key = key;
+          currentSort.asc = true;
+        }
+        renderTasks();
+        updateSortIcons();
+      }
+
+      // Update sort icons in headers
+      function updateSortIcons() {
+        const headers = document.querySelectorAll("thead th[data-sort-key]");
+        headers.forEach((th) => {
+          const icon = th.querySelector("i");
+          if (!icon) return;
+          const key = th.getAttribute("data-sort-key");
+          if (key === currentSort.key) {
+            icon.classList.remove("fa-sort");
+            icon.classList.add(currentSort.asc ? "fa-sort-up" : "fa-sort-down");
+            icon.style.color = "#dbeafe";
+          } else {
+            icon.classList.remove("fa-sort-up", "fa-sort-down");
+            icon.classList.add("fa-sort");
+            icon.style.color = "rgba(219, 234, 254, 0.7)";
+          }
+        });
+      }
+
+      // Initialization
+      function init() {
+        // Check login status per spec
+        if (localStorage.getItem("status") !== "loggedIn") {
+          window.location.href = "index.html";
+          return;
+        }
+
+        // Display username and email from localStorage if available
+        const username = localStorage.getItem("user") || "User";
+        currentUserName = username;
+        currentUserEmail = localStorage.getItem("userEmail") || username.toLowerCase().replace(/\s+/g, ".");
+        renderGreeting();
+        renderUserAvatar();
+
+        // Load data
+        loadData();
+
+        // Initial view
+        switchView("dashboard");
+
+        // Event listeners
+        navDashboardBtn.addEventListener("click", () => switchView("dashboard"));
+        navMembersBtn.addEventListener("click", () => switchView("members"));
+
+        darkModeToggle.addEventListener("click", () => {
+          if (document.documentElement.classList.contains("dark")) {
+            document.documentElement.classList.remove("dark");
+            localStorage.setItem("theme", "light");
+            darkModeToggle.querySelector(".fa-moon").style.display = "inline-block";
+            darkModeToggle.querySelector(".fa-sun").style.display = "none";
+          } else {
+            document.documentElement.classList.add("dark");
+            localStorage.setItem("theme", "dark");
+            darkModeToggle.querySelector(".fa-moon").style.display = "none";
+            darkModeToggle.querySelector(".fa-sun").style.display = "inline-block";
+          }
+        });
+
+        // On page load, set dark mode toggle icon and theme from localStorage or system preference
+        const savedTheme = localStorage.getItem("theme");
+        if (savedTheme === "dark" || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+          document.documentElement.classList.add("dark");
+          darkModeToggle.querySelector(".fa-moon").style.display = "none";
+          darkModeToggle.querySelector(".fa-sun").style.display = "inline-block";
+        } else {
+          document.documentElement.classList.remove("dark");
+          darkModeToggle.querySelector(".fa-moon").style.display = "inline-block";
+          darkModeToggle.querySelector(".fa-sun").style.display = "none";
+        }
+
+        profileBtn.addEventListener("click", () => {
+          const expanded = profileBtn.getAttribute("aria-expanded") === "true";
+          if (expanded) {
+            profileDropdown.style.display = "none";
+            profileBtn.setAttribute("aria-expanded", "false");
+          } else {
+            profileDropdown.style.display = "block";
+            profileBtn.setAttribute("aria-expanded", "true");
+          }
+        });
+        document.addEventListener("click", (e) => {
+          if (!profileDropdownWrapper.contains(e.target) && profileBtn.getAttribute("aria-expanded") === "true") {
+            profileDropdown.style.display = "none";
+            profileBtn.setAttribute("aria-expanded", "false");
+          }
+        });
+
+        selectAllCheckbox.addEventListener("change", (e) =>
+          toggleSelectAll(e.target.checked)
+        );
+
+        searchInput.addEventListener("input", () => {
+          renderTasks();
+          updateSelectAllCheckbox();
+        });
+
+        editForm.addEventListener("submit", (e) => {
+          e.preventDefault();
+          saveEditedTask(e);
+        });
+        cancelEditBtn.addEventListener("click", closeEditModal);
+
+        addTaskBtn.addEventListener("click", openAddTaskModal);
+        cancelAddBtn.addEventListener("click", closeAddTaskModal);
+        addTaskForm.addEventListener("submit", (e) => {
+          e.preventDefault();
+          saveNewTask(e);
+        });
+
+        deleteSelectedBtn.addEventListener("click", deleteSelectedTasks);
+
+        logoutBtn.addEventListener("click", () => {
+          localStorage.removeItem("status");
+          localStorage.removeItem("user");
+          localStorage.removeItem("userEmail");
+          window.location.href = "index.html";
+        });
+
+        // Sort headers click and keyboard
+        const sortableHeaders = document.querySelectorAll("thead th[data-sort-key]");
+        sortableHeaders.forEach((th) => {
+          th.addEventListener("click", () => {
+            const key = th.getAttribute("data-sort-key");
+            sortTasksBy(key);
+          });
+          th.addEventListener("keydown", (e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              const key = th.getAttribute("data-sort-key");
+              sortTasksBy(key);
+            }
+          });
+        });
+
+        // Initial render tasks if members view is active
+        if (!membersView.classList.contains("hidden")) {
+          renderTasks();
+          updateSelectAllCheckbox();
+        }
+      }
+
+      init();
+    })();
+  </script>
+</body>
+</html>
