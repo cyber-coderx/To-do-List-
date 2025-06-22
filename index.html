@@ -1,0 +1,990 @@
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1" name="viewport" />
+  <title>Astro Auth</title>
+  <link
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+    rel="stylesheet"
+  />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
+    rel="stylesheet"
+  />
+  <style>
+    /* Reset and base */
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      font-family: "Inter", sans-serif;
+      background: linear-gradient(to bottom, #f3f0f7, #d6c7d9, #4a1f4d);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 12px;
+      color: #333;
+    }
+
+    
+    button {
+      cursor: pointer;
+      border: none;
+      background: none;
+      font: inherit;
+    }
+    button:focus,
+    input:focus {
+      outline: 2px solid #5c3ee8;
+      outline-offset: 2px;
+    }
+    /* Container */
+    #auth-container {
+      max-width: 900px;
+      width: 100%;
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 0 30px rgba(0, 0, 0, 0.1);
+      display: flex;
+      overflow: hidden;
+      flex-direction: column;
+      min-height: 520px;
+    }
+    @media (min-width: 768px) {
+      #auth-container {
+        flex-direction: row;
+        min-height: 480px;
+        height: 480px;
+      }
+    }
+    /* Left side */
+    #auth-container > div.left-side {
+      position: relative;
+      background:white;
+      border-top-left-radius: 20px;
+      border-top-right-radius: 20px;
+
+      color: white;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow: hidden;
+    }
+    @media (min-width: 768px) {
+      #auth-container > div.left-side {
+        width: 50%;
+        border-top-right-radius: 0;
+        border-bottom-left-radius: 20px;
+      }
+    }
+    #auth-container > div.left-side img {
+      border-radius: 20px;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      user-select: none;
+      pointer-events: none;
+    }
+    #auth-container > div.left-side .astro-label {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      font-weight: 600;
+      font-size: 13px;
+      user-select: none;
+    }
+    #auth-container > div.left-side h1 {
+      position: absolute;
+      top: 70px;
+      left: 20px;
+      max-width: 200px;
+      font-weight: 600;
+      font-size: 18px;
+      line-height: 1.2;
+      margin: 0;
+      user-select: none;
+    }
+    @media (min-width: 768px) {
+      #auth-container > div.left-side h1 {
+        font-size: 22px;
+        max-width: 220px;
+        top: 80px;
+        left: 24px;
+      }
+    }
+    #auth-container > div.left-side .caption {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      font-weight: 300;
+      font-size: 11px;
+      opacity: 0.7;
+      margin: 0;
+      user-select: none;
+    }
+    /* Right side */
+    #auth-container > div.right-side {
+      background: white;
+      border-bottom-left-radius: 20px;
+      border-bottom-right-radius: 20px;
+      padding: 28px 32px;
+      position: relative;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-height: 480px;
+    }
+    @media (min-width: 768px) {
+      #auth-container > div.right-side {
+        width: 50%;
+        border-bottom-left-radius: 0;
+        border-top-right-radius: 20px;
+        padding: 32px 36px;
+        min-height: auto;
+      }
+    }
+    /* Message box */
+    #message-box {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      right: 20px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 13px;
+      display: none;
+      z-index: 10;
+      word-break: break-word;
+      max-height: 110px;
+      overflow-y: auto;
+    }
+    #message-box.error {
+      background-color: #fee2e2;
+      color: #b91c1c;
+      border: 1px solid #fca5a5;
+    }
+    #message-box.success {
+      background-color: #d1fae5;
+      color: #065f46;
+      border: 1px solid #6ee7b7;
+    }
+    /* Form switch links container at bottom */
+    #form-switch-links {
+      margin-top: 20px;
+      font-size: 13px;
+      color: #555;
+      display: flex;
+      gap: 20px;
+      user-select: none;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    #form-switch-links button {
+      text-decoration: underline;
+      font-weight: 600;
+      color: #555;
+      background: none;
+      padding: 0;
+      transition: color 0.2s ease;
+    }
+    #form-switch-links button:hover,
+    #form-switch-links button:focus {
+      color: #5c3ee8;
+      outline: none;
+    }
+    /* Forms */
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      max-width: 340px;
+      margin: 0 auto 0 auto;
+    }
+    form[hidden] {
+      display: none !important;
+    }
+    form h2 {
+      margin: 0 0 20px 0;
+      font-weight: 600;
+      font-size: 22px;
+      color: #222;
+      user-select: none;
+      text-align: center;
+    }
+    label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #444;
+      display: block;
+      margin-bottom: 3px;
+      user-select: none;
+    }
+    /* Password input wrapper for icon */
+    .password-wrapper {
+      position: relative;
+      width: 100%;
+    }
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"],
+    input[type="password"] {
+      width: 100%;
+      border-radius: 9999px;
+      border: none;
+      background-color: #f3f0f7;
+      color: #444;
+      font-size: 13px;
+      padding: 10px 44px 10px 18px; /* right padding for icon */
+      font-family: inherit;
+      transition: box-shadow 0.2s ease;
+      box-shadow: inset 0 0 5px rgba(0,0,0,0.05);
+      line-height: 1.2;
+      height: 36px;
+    }
+    input[type="text"]::placeholder,
+    input[type="email"]::placeholder,
+    input[type="tel"]::placeholder,
+    input[type="password"]::placeholder {
+      color: #999;
+    }
+    input[type="text"]:focus,
+    input[type="email"]:focus,
+    input[type="tel"]:focus,
+    input[type="password"]:focus {
+      outline: none;
+      box-shadow: 0 0 0 3px #5c3ee8;
+      background-color: #fff;
+    }
+    /* Add bottom margin specifically for reset password inputs */
+    #reset-email,
+    #reset-new-password {
+      margin-bottom: 20px;
+    }
+    /* Checkbox label */
+    label.checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: #666;
+      user-select: none;
+    }
+    input[type="checkbox"] {
+      width: 14px;
+      height: 14px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      cursor: pointer;
+      accent-color: #5c3ee8;
+      flex-shrink: 0;
+    }
+    /* Buttons */
+    button[type="submit"] {
+      width: 100%;
+      border-radius: 9999px;
+      background: linear-gradient(to right, #5c3ee8, #3a2a8a);
+      color: white;
+      font-weight: 600;
+      font-size: 13px;
+      padding: 10px 0;
+      box-shadow: 0 4px 8px rgba(92, 62, 232, 0.6);
+      transition: filter 0.2s ease;
+      user-select: none;
+    }
+    button[type="submit"]:hover,
+    button[type="submit"]:focus {
+      filter: brightness(1.1);
+      outline: none;
+    }
+    /* Password toggle button inside input */
+    .password-toggle-btn {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #999;
+      background: none;
+      border: none;
+      font-size: 14px;
+      cursor: pointer;
+      padding: 0;
+      margin: 0;
+      user-select: none;
+      transition: color 0.2s ease;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 22px;
+      width: 22px;
+      line-height: 1;
+    }
+ .passwod-toggle-btn {
+      position: absolute;
+      right: 12px;
+      top: 35%;
+      transform: translateY(-50%);
+      color: #999;
+      background: none;
+      border: none;
+      font-size: 14px;
+      cursor: pointer;
+      padding: 0;
+      margin: 0;
+      user-select: none;
+      transition: color 0.2s ease;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 22px;
+      width: 22px;
+      line-height: 1;
+    }
+    .password-toggle-btn i {
+      margin: 0;
+      padding: 0;
+      line-height: 1;
+      display: block;
+    }
+    .password-toggle-btn:hover,
+    .password-toggle-btn:focus {
+      color: #444;
+      outline: none;
+    }
+    /* Reset password form steps */
+    #reset-step2 {
+      display: none;
+    }
+    #reset-step2.active {
+      display: block;
+    }
+    /* Responsive adjustments */
+    @media (max-width: 480px) {
+      #auth-container {
+        border-radius: 16px;
+        min-height: auto;
+        height: auto;
+      }
+    
+      #auth-container > div.right-side {
+        border-radius: 16px;
+        padding: 24px 20px;
+        min-height: auto;
+      }
+      form {
+        max-width: 100%;
+      }
+      #auth-container > div.left-side h1 {
+        max-width: 100%;
+        font-size: 18px;
+        top: 70px;
+        left: 20px;
+      }
+      #auth-container > div.left-side img {
+        padding: 0;
+        margin: 0;
+        width: 100%;
+        height: auto;
+        object-fit: cover;
+        user-select: none;
+        pointer-events: none;
+      }
+    
+      #auth-container > div.left-side .astro-label {
+        top: 20px;
+        left: 20px;
+      }
+      #auth-container > div.left-side .caption {
+        bottom: 20px;
+        left: 20px;
+      }
+      #form-switch-links {
+        font-size: 13px;
+        gap: 16px;
+        margin-top: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="auth-container">
+    <!-- Left side with image and text -->
+    <div class="left-side" aria-hidden="true">
+      <img
+        alt="Cute astronaut standing on purple rocky terrain with stars and mountains in the background, under a twilight sky"
+        src="https://storage.googleapis.com/a1aa/image/688e96db-415b-42b0-19d7-80e8a49e8713.jpg"
+        width="400"
+        height="480"
+        draggable="false"
+      />
+      <div class="astro-label">Astro</div>
+      <h1>
+        Exploring new frontiers, one step at a Time.
+      </h1>
+      <p class="caption">Beyond Earth's grasp</p>
+    </div>
+
+    <!-- Right side forms container -->
+    <div class="right-side">
+      <!-- Message box -->
+      <div id="message-box" role="alert" aria-live="assertive"></div>
+
+      <!-- LOGIN FORM -->
+      <form id="form-login" aria-label="Login form" novalidate hidden>
+        <h2>Login</h2>
+        <label for="login-identifier">Email or Phone no.</label>
+        <input
+          id="login-identifier"
+          name="identifier"
+          type="text"
+          autocomplete="username"
+          placeholder="Email or Phone no."
+          required
+          aria-required="true"
+        />
+        <label for="login-password">Password</label>
+        <div class="password-wrapper">
+          <input
+            id="login-password"
+            name="password"
+            type="password"
+            autocomplete="current-password"
+            placeholder="Password"
+            required
+            aria-required="true"
+          />
+          <button
+            type="button"
+            id="login-toggle-password"
+            aria-label="Toggle password visibility"
+            class="password-toggle-btn"
+            tabindex="-1"
+          >
+            <i class="fas fa-eye"></i>
+          </button>
+        </div>
+        <button type="submit">Login</button>
+      </form>
+
+      <!-- SIGNUP FORM -->
+      <form id="form-signup" aria-label="Signup form" novalidate hidden>
+        <h2>Create Account</h2>
+        <label for="signup-fullname">Full Name</label>
+        <input
+          id="signup-fullname"
+          name="fullname"
+          type="text"
+          autocomplete="name"
+          placeholder="Full Name"
+          required
+          aria-required="true"
+        />
+        <label for="signup-email">Email</label>
+        <input
+          id="signup-email"
+          name="email"
+          type="email"
+          autocomplete="email"
+          placeholder="Email"
+          required
+          aria-required="true"
+        />
+        <label for="signup-phone">Phone no.</label>
+        <input
+          id="signup-phone"
+          name="phone"
+          type="tel"
+          autocomplete="tel"
+          placeholder="Phone no."
+          required
+          aria-required="true"
+        />
+        <label for="signup-password">Password</label>
+        <div class="password-wrapper">
+          <input
+            id="signup-password"
+            name="password"
+            type="password"
+            autocomplete="new-password"
+            placeholder="Password"
+            required
+            aria-required="true"
+          />
+          <button
+            type="button"
+            id="signup-toggle-password"
+            aria-label="Toggle password visibility"
+            class="password-toggle-btn"
+            tabindex="-1"
+          >
+            <i class="fas fa-eye"></i>
+          </button>
+        </div>
+        <label class="checkbox-label" for="signup-agree">
+          <input
+            id="signup-agree"
+            name="agree"
+            type="checkbox"
+            required
+            aria-required="true"
+          />
+          I agree to all terms and Privacy Policy
+        </label>
+        <button type="submit">Sign up</button>
+      </form>
+
+      <!-- RESET PASSWORD FORM -->
+      <form id="form-reset" aria-label="Password reset form" novalidate hidden>
+        <h2 id="reset-title">Reset Password</h2>
+
+        <!-- Step 1: Enter email -->
+        <div id="reset-step1">
+          <label for="reset-email">Email</label>
+          <input
+            id="reset-email"
+            name="email"
+            type="email"
+            autocomplete="email"
+            placeholder="Email"
+            required
+            aria-required="true"
+          />
+          <button type="submit" id="reset-step1-submit">Send Reset Link</button>
+        </div>
+
+        <!-- Step 2: Set new password -->
+        <div id="reset-step2">
+          <label for="reset-new-password">New Password</label>
+          <div class="password-wrapper">
+            <input
+              id="reset-new-password"
+              name="newPassword"
+              type="password"
+              autocomplete="new-password"
+              placeholder="New Password"
+              required
+              aria-required="true"
+            />
+            <button
+              type="button"
+              id="reset-toggle-password"
+              aria-label="Toggle password visibility"
+              class="passwod-toggle-btn"
+              tabindex="-1"
+            >
+              <i class="fas fa-eye"></i>
+            </button>
+          </div>
+          <button type="submit" id="reset-step2-submit">Set New Password</button>
+        </div>
+      </form>
+
+      <!-- Form switch links at bottom -->
+      <nav id="form-switch-links" aria-label="Switch between login, signup, and reset password forms">
+      </nav>
+    </div>
+  </div>
+
+  <script>
+    (() => {
+      // Elements
+      const forms = {
+        login: document.getElementById("form-login"),
+        signup: document.getElementById("form-signup"),
+        reset: document.getElementById("form-reset"),
+      };
+      const formSwitchLinksContainer = document.getElementById("form-switch-links");
+      const messageBox = document.getElementById("message-box");
+
+      // Password toggle buttons and inputs
+      const pwToggles = {
+        login: {
+          btn: document.getElementById("login-toggle-password"),
+          input: document.getElementById("login-password"),
+        },
+        signup: {
+          btn: document.getElementById("signup-toggle-password"),
+          input: document.getElementById("signup-password"),
+        },
+        reset: {
+          btn: document.getElementById("reset-toggle-password"),
+          input: document.getElementById("reset-new-password"),
+        },
+      };
+
+      // Reset password form steps
+      const resetStep1 = document.getElementById("reset-step1");
+      const resetStep2 = document.getElementById("reset-step2");
+      const resetTitle = document.getElementById("reset-title");
+
+      // State
+      let currentForm = "login"; // default form
+      let resetEmail = null; // store email for reset password step 2
+      let messageTimeoutId = null;
+
+      // All form names
+      const allForms = ["login", "signup", "reset"];
+
+      // Utility: Show message
+      function showMessage(type, messages) {
+        clearTimeout(messageTimeoutId);
+        messageBox.style.display = "block";
+        messageBox.classList.remove("error", "success");
+        if (type === "error") {
+          messageBox.classList.add("error");
+        } else if (type === "success") {
+          messageBox.classList.add("success");
+        }
+        if (Array.isArray(messages)) {
+          messageBox.innerHTML = messages.map((m) => `<div>• ${m}</div>`).join("");
+        } else {
+          messageBox.textContent = messages;
+        }
+        messageTimeoutId = setTimeout(() => {
+          messageBox.style.display = "none";
+          messageBox.textContent = "";
+        }, 5000);
+      }
+
+      // Utility: Hide all forms
+      function hideAllForms() {
+        Object.values(forms).forEach((form) => {
+          form.hidden = true;
+          form.reset();
+        });
+        // Reset reset password form steps
+        resetStep1.style.display = "block";
+        resetStep2.style.display = "none";
+        resetTitle.textContent = "Reset Password";
+        resetEmail = null;
+        resetPasswordToggleReset();
+        resetPasswordToggleReset("login");
+        resetPasswordToggleReset("signup");
+      }
+
+      // Show form by name
+      function showForm(name) {
+        if (!forms[name]) return;
+        hideAllForms();
+        forms[name].hidden = false;
+        currentForm = name;
+        clearMessage();
+        renderFormSwitchLinks();
+      }
+
+      // Clear message box immediately
+      function clearMessage() {
+        clearTimeout(messageTimeoutId);
+        messageBox.style.display = "none";
+        messageBox.textContent = "";
+      }
+
+      // Password toggle logic
+      function togglePasswordVisibility(formName) {
+        const { btn, input } = pwToggles[formName];
+        if (!btn || !input) return;
+        btn.addEventListener("click", () => {
+          if (input.type === "password") {
+            input.type = "text";
+            btn.querySelector("i").classList.remove("fa-eye");
+            btn.querySelector("i").classList.add("fa-eye-slash");
+          } else {
+            input.type = "password";
+            btn.querySelector("i").classList.remove("fa-eye-slash");
+            btn.querySelector("i").classList.add("fa-eye");
+          }
+        });
+      }
+
+      // Reset password toggle to default state
+      function resetPasswordToggleReset(formName) {
+        if (formName) {
+          const { btn, input } = pwToggles[formName];
+          if (!btn || !input) return;
+          input.type = "password";
+          btn.querySelector("i").classList.remove("fa-eye-slash");
+          btn.querySelector("i").classList.add("fa-eye");
+        } else {
+          // reset all
+          Object.keys(pwToggles).forEach(resetPasswordToggleReset);
+        }
+      }
+
+      // LocalStorage user data helpers
+      function getUsers() {
+        try {
+          const users = JSON.parse(localStorage.getItem("users"));
+          return Array.isArray(users) ? users : [];
+        } catch {
+          return [];
+        }
+      }
+      function saveUsers(users) {
+        localStorage.setItem("users", JSON.stringify(users));
+      }
+      function findUserByEmailOrPhone(identifier) {
+        const users = getUsers();
+        return users.find(
+          (u) =>
+            u.email.toLowerCase() === identifier.toLowerCase() ||
+            u.phone === identifier
+        );
+      }
+      function findUserByEmail(email) {
+        const users = getUsers();
+        return users.find((u) => u.email.toLowerCase() === email.toLowerCase());
+      }
+      function addUser(user) {
+        const users = getUsers();
+        users.push(user);
+        saveUsers(users);
+      }
+      function updateUserPassword(email, newPassword) {
+        const users = getUsers();
+        const idx = users.findIndex(
+          (u) => u.email.toLowerCase() === email.toLowerCase()
+        );
+        if (idx !== -1) {
+          users[idx].password = newPassword;
+          saveUsers(users);
+          return true;
+        }
+        return false;
+      }
+
+      // Login session helpers
+      function setLoggedInUser(email) {
+        localStorage.setItem("status", "loggedIn");
+        localStorage.setItem("user", email);
+      }
+      function clearLoggedInUser() {
+        localStorage.removeItem("status");
+        localStorage.removeItem("user");
+      }
+      function isLoggedIn() {
+        return localStorage.getItem("status") === "loggedIn";
+      }
+
+      // Redirect if logged in
+      function redirectIfLoggedIn() {
+        if (isLoggedIn()) {
+          window.location.href = "dashboard.html";
+        }
+      }
+
+      // Validation helpers
+      function validateLoginForm(data) {
+        const errors = [];
+        if (!data.identifier.trim()) {
+          errors.push("Email or Phone no. is required.");
+        }
+        if (!data.password.trim()) {
+          errors.push("Password is required.");
+        }
+        return errors;
+      }
+      function validateSignupForm(data) {
+        const errors = [];
+        if (!data.fullname.trim()) {
+          errors.push("Full Name is required.");
+        }
+        if (!data.email.trim()) {
+          errors.push("Email is required.");
+        } else if (!validateEmail(data.email.trim())) {
+          errors.push("Email format is invalid.");
+        }
+        if (!data.phone.trim()) {
+          errors.push("Phone no. is required.");
+        }
+        if (!data.password.trim()) {
+          errors.push("Password is required.");
+        }
+        if (!data.agree) {
+          errors.push("You must agree to the terms and Privacy Policy.");
+        }
+        return errors;
+      }
+      function validateResetStep1(data) {
+        const errors = [];
+        if (!data.email.trim()) {
+          errors.push("Email is required.");
+        } else if (!validateEmail(data.email.trim())) {
+          errors.push("Email format is invalid.");
+        }
+        return errors;
+      }
+      function validateResetStep2(data) {
+        const errors = [];
+        if (!data.newPassword.trim()) {
+          errors.push("New password is required.");
+        }
+        return errors;
+      }
+      function validateEmail(email) {
+        // Simple email regex
+        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return re.test(email);
+      }
+
+      // Render form switch links at bottom, excluding current form
+      function renderFormSwitchLinks() {
+        formSwitchLinksContainer.innerHTML = "";
+        const allForms = ["login", "signup", "reset"];
+        allForms.forEach((formName) => {
+          if (formName === currentForm) return; // skip current form
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.textContent =
+            formName === "login"
+              ? "Login"
+              : formName === "signup"
+              ? "Sign up"
+              : "Reset Password";
+          btn.setAttribute("aria-label", `Switch to ${btn.textContent} form`);
+          btn.addEventListener("click", () => {
+            showForm(formName);
+          });
+          formSwitchLinksContainer.appendChild(btn);
+        });
+      }
+
+      // Event handlers for forms
+      function setupLoginForm() {
+        const form = forms.login;
+        form.addEventListener("submit", (e) => {
+          e.preventDefault();
+          clearMessage();
+          const identifier = form.identifier.value.trim();
+          const password = form.password.value;
+          const errors = validateLoginForm({ identifier, password });
+          if (errors.length) {
+            showMessage("error", errors);
+            return;
+          }
+          const user = findUserByEmailOrPhone(identifier);
+          if (!user) {
+            showMessage("error", "User not found.");
+            return;
+          }
+          if (user.password !== password) {
+            showMessage("error", "Incorrect password.");
+            return;
+          }
+          // Success: set login session and redirect
+          setLoggedInUser(user.email);
+          showMessage("success", "Login successful! Redirecting...");
+          setTimeout(() => {
+            window.location.href = "dashboard.html";
+          }, 1000);
+          form.reset();
+          resetPasswordToggleReset("login");
+        });
+      }
+
+      function setupSignupForm() {
+        const form = forms.signup;
+        form.addEventListener("submit", (e) => {
+          e.preventDefault();
+          clearMessage();
+          const fullname = form.fullname.value.trim();
+          const email = form.email.value.trim();
+          const phone = form.phone.value.trim();
+          const password = form.password.value;
+          const agree = form.agree.checked;
+          const errors = validateSignupForm({ fullname, email, phone, password, agree });
+          if (errors.length) {
+            showMessage("error", errors);
+            return;
+          }
+          if (findUserByEmail(email)) {
+            showMessage("error", "Email already registered.");
+            return;
+          }
+          // Save user
+          addUser({ fullname, email, phone, password });
+          showMessage("success", "Signup successful! You can now login.");
+          form.reset();
+          resetPasswordToggleReset("signup");
+          // Switch to login form after signup success
+          showForm("login");
+        });
+      }
+
+      function setupResetForm() {
+        const form = forms.reset;
+        // Step 1 submit
+        form.addEventListener("submit", (e) => {
+          e.preventDefault();
+          clearMessage();
+          if (!resetEmail) {
+            // Step 1: validate email
+            const email = form.email.value.trim();
+            const errors = validateResetStep1({ email });
+            if (errors.length) {
+              showMessage("error", errors);
+              return;
+            }
+            const user = findUserByEmail(email);
+            if (!user) {
+              showMessage("error", "Email not found.");
+              return;
+            }
+            // Proceed to step 2
+            resetEmail = email;
+            resetStep1.style.display = "none";
+            resetStep2.style.display = "block";
+            resetTitle.textContent = `Set New Password for ${email}`;
+            form.reset();
+            resetPasswordToggleReset("reset");
+          } else {
+            // Step 2: set new password
+            const newPassword = form.newPassword.value;
+            const errors = validateResetStep2({ newPassword });
+            if (errors.length) {
+              showMessage("error", errors);
+              return;
+            }
+            const updated = updateUserPassword(resetEmail, newPassword);
+            if (!updated) {
+              showMessage("error", "Failed to update password.");
+              return;
+            }
+            showMessage("success", "Password updated successfully! You can now login.");
+            resetEmail = null;
+            form.reset();
+            resetStep1.style.display = "block";
+            resetStep2.style.display = "none";
+            resetTitle.textContent = "Reset Password";
+            resetPasswordToggleReset("reset");
+            // Switch to login form after reset success
+            showForm("login");
+          }
+        });
+      }
+
+      // Initialize all
+      function init() {
+        redirectIfLoggedIn();
+        setupLoginForm();
+        setupSignupForm();
+        setupResetForm();
+        Object.keys(pwToggles).forEach(togglePasswordVisibility);
+        showForm("login");
+      }
+
+      // Run init on DOM ready
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", init);
+      } else {
+        init();
+      }
+    })();
+  </script>
+</body>
+</html>
