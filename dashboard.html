@@ -708,6 +708,24 @@
       color: #fff;
     }
 
+    /* Readonly email display */
+    .readonly-email {
+      padding: 0.5rem 0.75rem;
+      border-radius: 8px;
+      background-color: #e6e6e6;
+      color: #3b2f6d;
+      font-size: 1rem;
+      user-select: text;
+      border: 1px solid #e6e6e6;
+      margin-bottom: 1rem;
+      word-break: break-word;
+    }
+    .modal-content.dark .readonly-email {
+      background-color: #4a1f4a;
+      color: #d1c9e0;
+      border-color: #a97ebd;
+    }
+
     /* Responsive */
     @media (max-width: 768px) {
       #sidebar {
@@ -811,8 +829,8 @@
       <form id="editForm" novalidate>
         <label for="editTaskName">Task Name</label>
         <input type="text" id="editTaskName" name="taskName" required />
-        <label for="editUserEmail">User Email</label>
-        <input type="email" id="editUserEmail" name="userEmail" required />
+        <label>User Email</label>
+        <div id="editUserEmailDisplay" class="readonly-email" aria-live="polite" aria-atomic="true"></div>
         <label for="editLoginTime">Login Time</label>
         <input type="time" id="editLoginTime" name="loginTime" required />
         <label for="editDeadline">Deadline</label>
@@ -832,8 +850,8 @@
       <form id="addTaskForm" novalidate>
         <label for="addTaskName">Task Name</label>
         <input type="text" id="addTaskName" name="taskName" placeholder="Enter task name" required />
-        <label for="addUserEmail">User Email</label>
-        <input type="email" id="addUserEmail" name="userEmail" placeholder="Enter user email" required />
+        <label>User Email</label>
+        <div id="addUserEmailDisplay" class="readonly-email" aria-live="polite" aria-atomic="true"></div>
         <label for="addLoginTime">Login Time</label>
         <input type="time" id="addLoginTime" name="loginTime" required />
         <label for="addDeadline">Deadline</label>
@@ -876,7 +894,7 @@
       const editForm = document.getElementById("editForm");
       const cancelEditBtn = document.getElementById("cancelEditBtn");
       const editTaskNameInput = document.getElementById("editTaskName");
-      const editUserEmailInput = document.getElementById("editUserEmail");
+      const editUserEmailDisplay = document.getElementById("editUserEmailDisplay");
       const editLoginTimeInput = document.getElementById("editLoginTime");
       const editDeadlineInput = document.getElementById("editDeadline");
 
@@ -885,12 +903,13 @@
       const addTaskForm = document.getElementById("addTaskForm");
       const cancelAddBtn = document.getElementById("cancelAddBtn");
       const addTaskNameInput = document.getElementById("addTaskName");
-      const addUserEmailInput = document.getElementById("addUserEmail");
+      const addUserEmailDisplay = document.getElementById("addUserEmailDisplay");
       const addLoginTimeInput = document.getElementById("addLoginTime");
       const addDeadlineInput = document.getElementById("addDeadline");
 
       // State
       let currentUserName = "John Doe";
+      let currentUserEmail = "john.doe";
       let tasks = [];
       let filteredTasks = [];
       let currentSort = { key: null, asc: true };
@@ -920,7 +939,7 @@
             {
               id: crypto.randomUUID(),
               taskName: "Finish project report",
-              userEmail: "alice@example.com",
+              userEmail: "alice",
               loginTime: "09:30",
               deadline: "2024-06-15",
               selected: false,
@@ -928,7 +947,7 @@
             {
               id: crypto.randomUUID(),
               taskName: "Update website content",
-              userEmail: "bob@example.com",
+              userEmail: "bob",
               loginTime: "10:15",
               deadline: "2024-06-20",
               selected: false,
@@ -936,7 +955,7 @@
             {
               id: crypto.randomUUID(),
               taskName: "Prepare presentation slides",
-              userEmail: "carol@example.com",
+              userEmail: "carol",
               loginTime: "08:45",
               deadline: "2024-06-18",
               selected: false,
@@ -944,7 +963,7 @@
             {
               id: crypto.randomUUID(),
               taskName: "Schedule team meeting",
-              userEmail: "dave@example.com",
+              userEmail: "dave",
               loginTime: "11:00",
               deadline: "2024-06-22",
               selected: false,
@@ -952,7 +971,7 @@
             {
               id: crypto.randomUUID(),
               taskName: "Review budget proposal",
-              userEmail: "eve@example.com",
+              userEmail: "eve",
               loginTime: "09:00",
               deadline: "2024-06-19",
               selected: false,
@@ -1225,7 +1244,7 @@
         const task = tasks.find((t) => t.id === id);
         if (!task) return;
         editTaskNameInput.value = task.taskName;
-        editUserEmailInput.value = task.userEmail;
+        editUserEmailDisplay.textContent = task.userEmail;
         editLoginTimeInput.value = task.loginTime;
         editDeadlineInput.value = task.deadline;
         showModal(editModal);
@@ -1246,7 +1265,7 @@
         const task = tasks.find((t) => t.id === editingTaskId);
         if (!task) return;
         task.taskName = editTaskNameInput.value.trim();
-        task.userEmail = editUserEmailInput.value.trim();
+        // userEmail remains unchanged
         task.loginTime = editLoginTimeInput.value;
         task.deadline = editDeadlineInput.value;
         saveData();
@@ -1259,6 +1278,7 @@
       function openAddTaskModal() {
         showModal(addTaskModal);
         addTaskForm.reset();
+        addUserEmailDisplay.textContent = currentUserEmail;
         addTaskNameInput.focus();
       }
 
@@ -1272,15 +1292,14 @@
       function saveNewTask(e) {
         e.preventDefault();
         const newTaskName = addTaskNameInput.value.trim();
-        const newUserEmail = addUserEmailInput.value.trim();
         const newLoginTime = addLoginTimeInput.value;
         const newDeadline = addDeadlineInput.value;
-        if (!newTaskName || !newUserEmail || !newLoginTime || !newDeadline) return;
+        if (!newTaskName || !newLoginTime || !newDeadline) return;
 
         const newTask = {
           id: crypto.randomUUID(),
           taskName: newTaskName,
-          userEmail: newUserEmail,
+          userEmail: currentUserEmail,
           loginTime: newLoginTime,
           deadline: newDeadline,
           selected: false,
@@ -1412,9 +1431,11 @@
           return;
         }
 
-        // Display username from localStorage if available
+        // Display username and email from localStorage if available
         const username = localStorage.getItem("user") || "User";
         currentUserName = username;
+        // For demo, use username only (no domain)
+        currentUserEmail = localStorage.getItem("userEmail") || username.toLowerCase().replace(/\s+/g, ".");
         renderGreeting();
         renderUserAvatar();
 
@@ -1461,7 +1482,13 @@
             const key = th.getAttribute("data-sort-key");
             sortTasksBy(key);
           });
-          th.addEventListener("keydown", handleSortKeydown);
+          th.addEventListener("keydown", (e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              const key = th.getAttribute("data-sort-key");
+              sortTasksBy(key);
+            }
+          });
         });
 
         // Initial render tasks if members view is active
