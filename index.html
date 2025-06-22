@@ -472,73 +472,84 @@
         <button type="submit">Login</button>
       </form>
 
-      <!-- SIGNUP FORM -->
-      <form id="form-signup" aria-label="Signup form" novalidate hidden>
-        <h2>Create Account</h2>
-        <label for="signup-fullname">Full Name</label>
-        <input
-          id="signup-fullname"
-          name="fullname"
-          type="text"
-          autocomplete="name"
-          placeholder="Full Name"
-          required
-          aria-required="true"
-        />
-        <label for="signup-email">Email</label>
-        <input
-          id="signup-email"
-          name="email"
-          type="email"
-          autocomplete="email"
-          placeholder="Email"
-          required
-          aria-required="true"
-        />
-        <label for="signup-phone">Phone no.</label>
-        <input
-          id="signup-phone"
-          name="phone"
-          type="tel"
-          autocomplete="tel"
-          placeholder="Phone no."
-          required
-          aria-required="true"
-        />
-        <label for="signup-password">Password</label>
-        <div class="password-wrapper">
-          <input
-            id="signup-password"
-            name="password"
-            type="password"
-            autocomplete="new-password"
-            placeholder="Password"
-            required
-            aria-required="true"
-          />
-          <button
-            type="button"
-            id="signup-toggle-password"
-            aria-label="Toggle password visibility"
-            class="password-toggle-btn"
-            tabindex="-1"
-          >
-            <i class="fas fa-eye"></i>
-          </button>
-        </div>
-        <label class="checkbox-label" for="signup-agree">
-          <input
-            id="signup-agree"
-            name="agree"
-            type="checkbox"
-            required
-            aria-required="true"
-          />
-          I agree to all terms and Privacy Policy
-        </label>
-        <button type="submit">Sign up</button>
-      </form>
+<!-- SIGNUP FORM -->
+<form id="form-signup" aria-label="Signup form" novalidate hidden>
+  <h2 style="margin: 0px 0;">Create Account</h2>
+  
+  <label for="signup-fullname" style="margin: 0px 0;">Full Name</label>
+  <input
+    id="signup-fullname"
+    name="fullname"
+    type="text"
+    autocomplete="name"
+    placeholder="Full Name"
+    required
+    aria-required="true"
+    style="margin: 0px 0;"
+  />
 
+  <label for="signup-email" style="margin: 0px 0;">Email</label>
+  <input
+    id="signup-email"
+    name="email"
+    type="email"
+    autocomplete="email"
+    placeholder="Email"
+    required
+    aria-required="true"
+    style="margin: 0px 0;"
+  />
+
+  <label for="signup-phone" style="margin: 0px 0;">Phone no.</label>
+  <input
+    id="signup-phone"
+    name="phone"
+    type="tel"
+    autocomplete="tel"
+    placeholder="Phone no."
+    required
+    aria-required="true"
+    style="margin: 0px 0;"
+  />
+
+  <label for="signup-password" style="margin: 0px 0;">Password</label>
+  <div class="password-wrapper" style="margin: 0px 0;">
+    <input
+      id="signup-password"
+      name="password"
+      type="password"
+      autocomplete="new-password"
+      placeholder="Password"
+      required
+      aria-required="true"
+      style="margin: 0;"
+    />
+    <button
+      type="button"
+      id="signup-toggle-password"
+      aria-label="Toggle password visibility"
+      class="password-toggle-btn"
+      tabindex="-1"
+      style="margin-left: 0px;"
+    >
+      <i class="fas fa-eye"></i>
+    </button>
+  </div>
+
+  <label class="checkbox-label" for="signup-agree" style="margin: 0px 0;">
+    <input
+      id="signup-agree"
+      name="agree"
+      type="checkbox"
+      required
+      aria-required="true"
+      style="margin-right: 0px;"
+    />
+    I agree to all terms and Privacy Policy
+  </label>
+
+  <button type="submit" style="margin: 0px 0;">Sign up</button>
+</form>
       <!-- RESET PASSWORD FORM -->
       <form id="form-reset" aria-label="Password reset form" novalidate hidden>
         <h2 id="reset-title">Reset Password</h2>
