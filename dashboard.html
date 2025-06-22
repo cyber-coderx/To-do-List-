@@ -2,7 +2,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Modern Responsive Dashboard with To-Do List</title>
+  <title>Modern Responsive Dashboard with To-Do List & Local Storage Editor</title>
   <link
     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
     rel="stylesheet"
@@ -32,7 +32,7 @@
       background: none;
       font: inherit;
     }
-    button:focus, input:focus {
+    button:focus, input:focus, textarea:focus {
       outline: 2px solid #3b2f6d;
       outline-offset: 2px;
     }
@@ -295,6 +295,7 @@
       font-size: 0.875rem;
       user-select: none;
       transition: background-color 0.2s ease;
+      cursor: pointer;
     }
     #profileDropdown a:hover {
       background: #e6e6e6;
@@ -357,6 +358,7 @@
       align-items: center;
       margin-bottom: 1rem;
       gap: 1rem;
+      flex-wrap: wrap;
     }
     #membersView h2 {
       font-size: 1.5rem;
@@ -365,6 +367,8 @@
       user-select: none;
       margin: 0;
       transition: color 0.3s ease;
+      flex-grow: 1;
+      min-width: 150px;
     }
     main.dark #membersView h2 {
       color: #a97ebd;
@@ -383,6 +387,7 @@
       user-select: none;
       border: none;
       cursor: pointer;
+      white-space: nowrap;
     }
     #addTaskBtn:hover {
       background: #2a1f4a;
@@ -406,6 +411,7 @@
       visibility: hidden;
       opacity: 0;
       pointer-events: none;
+      white-space: nowrap;
     }
     #deleteSelectedBtn.visible {
       visibility: visible;
@@ -435,6 +441,7 @@
       color: #1a1a2e;
       font-size: 1rem;
       transition: border-color 0.3s ease, background-color 0.3s ease, color 0.3s ease;
+      margin-bottom: 1rem;
     }
     #searchInput::placeholder {
       color: #a97ebd;
@@ -624,12 +631,13 @@
       transition: color 0.3s ease;
     }
     .modal-content.dark label {
-      color: #d1c9e0;
+      color: #d1e0e0;
     }
     .modal-content input[type="text"],
     .modal-content input[type="email"],
     .modal-content input[type="time"],
-    .modal-content input[type="date"] {
+    .modal-content input[type="date"],
+    .modal-content textarea {
       width: 100%;
       padding: 0.5rem 0.75rem;
       border-radius: 8px;
@@ -638,11 +646,14 @@
       color: #1a1a2e;
       background: white;
       transition: border-color 0.3s ease, background-color 0.3s ease, color 0.3s ease;
+      font-family: 'Inter', sans-serif;
+      resize: vertical;
     }
     .modal-content input[type="text"]:focus,
     .modal-content input[type="email"]:focus,
     .modal-content input[type="time"]:focus,
-    .modal-content input[type="date"]:focus {
+    .modal-content input[type="date"]:focus,
+    .modal-content textarea:focus {
       border-color: #3b2f6d;
       outline: none;
       box-shadow: 0 0 0 2px #3b2f6d;
@@ -650,7 +661,8 @@
     .modal-content.dark input[type="text"],
     .modal-content.dark input[type="email"],
     .modal-content.dark input[type="time"],
-    .modal-content.dark input[type="date"] {
+    .modal-content.dark input[type="date"],
+    .modal-content.dark textarea {
       background: #4a1f4a;
       color: #d1c9e0;
       border-color: #a97ebd;
@@ -726,21 +738,370 @@
       border-color: #a97ebd;
     }
 
+    /* Local Storage Panel */
+    #localStorageView {
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.1);
+      margin-top: 1.5rem;
+      padding: 1rem 1.5rem;
+      max-height: 40vh;
+      overflow-y: auto;
+      transition: background-color 0.3s ease;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    #localStorageView.dark {
+      background: #1a1a2e;
+      box-shadow: 0 0 20px rgba(59,47,109,0.5);
+      color: #d1c9e0;
+    }
+    #localStorageView h2 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: #3b2f6d;
+      user-select: none;
+      transition: color 0.3s ease;
+    }
+    #localStorageView.dark h2 {
+      color: #a97ebd;
+    }
+    #storageList {
+      max-height: 25vh;
+      overflow-y: auto;
+      border: 1px solid #e6e6e6;
+      border-radius: 12px;
+      padding: 0.5rem;
+      font-family: monospace, monospace;
+      font-size: 0.875rem;
+      background: #fafafa;
+      color: #1a1a2e;
+      transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+      flex-shrink: 0;
+    }
+    #localStorageView.dark #storageList {
+      background: #3b2f6d;
+      color: #d1c9e0;
+      border-color: #a97ebd;
+    }
+    #storageList div {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.25rem 0.5rem;
+      border-bottom: 1px solid #e6e6e6;
+      transition: border-color 0.3s ease;
+    }
+    #localStorageView.dark #storageList div {
+      border-color: #5a3f7a;
+    }
+    #storageList div:last-child {
+      border-bottom: none;
+    }
+    #storageList .key {
+      font-weight: 600;
+      color: #3b2f6d;
+      max-width: 40%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      user-select: text;
+      transition: color 0.3s ease;
+    }
+    #localStorageView.dark #storageList .key {
+      color: #a97ebd;
+    }
+    #storageList .value {
+      max-width: 50%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      user-select: text;
+      color: #6b6b6b;
+      transition: color 0.3s ease;
+    }
+    #localStorageView.dark #storageList .value {
+      color: #cbb9e0;
+    }
+    #storageList button.editStorageBtn {
+      background: none;
+      border: none;
+      color: #3b2f6d;
+      cursor: pointer;
+      font-size: 0.9rem;
+      padding: 0 0.25rem;
+      transition: color 0.2s ease;
+      flex-shrink: 0;
+    }
+    #storageList button.editStorageBtn:hover {
+      color: #2a1f4a;
+    }
+    #localStorageView.dark #storageList button.editStorageBtn {
+      color: #d1c9e0;
+    }
+    #localStorageView.dark #storageList button.editStorageBtn:hover {
+      color: #7a5a9e;
+    }
+
+    #storageEditor {
+      margin-top: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      flex-grow: 1;
+      min-height: 0;
+    }
+    #storageEditor label {
+      font-weight: 600;
+      color: #3b2f6d;
+      user-select: none;
+      transition: color 0.3s ease;
+    }
+    #localStorageView.dark #storageEditor label {
+      color: #a97ebd;
+    }
+    #storageEditor input[type="text"],
+    #storageEditor textarea {
+      width: 100%;
+      padding: 0.5rem 0.75rem;
+      border-radius: 8px;
+      border: 1px solid #e6e6e6;
+      font-size: 0.875rem;
+      font-family: monospace, monospace;
+      resize: vertical;
+      transition: border-color 0.3s ease, background-color 0.3s ease, color 0.3s ease;
+      color: #1a1a2e;
+      background: white;
+      min-height: 3rem;
+    }
+    #storageEditor input[type="text"]:focus,
+    #storageEditor textarea:focus {
+      border-color: #3b2f6d;
+      outline: none;
+      box-shadow: 0 0 0 2px #3b2f6d;
+    }
+    #localStorageView.dark #storageEditor input[type="text"],
+    #localStorageView.dark #storageEditor textarea {
+      background: #4a1f4a;
+      color: #d1c9e0;
+      border-color: #a97ebd;
+    }
+    #storageEditor textarea {
+      min-height: 6rem;
+      flex-grow: 1;
+      min-height: 6rem;
+    }
+    #storageEditor .buttons {
+      display: flex;
+      gap: 0.75rem;
+      margin-top: 0.5rem;
+      flex-wrap: wrap;
+    }
+    #storageEditor button {
+      border-radius: 9999px;
+      font-weight: 600;
+      font-size: 0.875rem;
+      padding: 0.5rem 1rem;
+      user-select: none;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    #saveStorageBtn {
+      background: #3b2f6d;
+      color: white;
+      flex-grow: 1;
+      justify-content: center;
+    }
+    #saveStorageBtn:hover {
+      background: #2a1f4a;
+    }
+    #deleteStorageBtn {
+      background: #a97ebd;
+      color: white;
+      flex-grow: 1;
+      justify-content: center;
+    }
+    #deleteStorageBtn:hover {
+      background: #7a5a9e;
+    }
+    #clearStorageBtn {
+      background: #6b6b6b;
+      color: white;
+      margin-left: auto;
+      flex-grow: 1;
+      justify-content: center;
+    }
+    #clearStorageBtn:hover {
+      background: #4a4a4a;
+    }
+    #deleteStorageBtn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
     /* Responsive */
-    @media (max-width: 768px) {
+    @media (max-width: 1024px) {
       #sidebar {
-        width: 12rem;
-        min-width: 12rem;
+        width: 14rem;
+        min-width: 14rem;
+      }
+    }
+
+    @media (max-width: 768px) {
+      body, html {
+        flex-direction: column;
+        height: 100%;
+      }
+      #sidebar {
+        width: 100%;
+        min-width: auto;
+        border-radius: 0;
+        box-shadow: none;
+        border: none;
+        flex-shrink: 0;
+        flex-direction: row;
+        overflow-x: auto;
+        padding: 0.25rem 0;
+        justify-content: center;
+      }
+      #sidebar .title {
+        display: none;
+      }
+      #sidebar nav {
+        flex-direction: row;
+        gap: 0.5rem;
+        margin-top: 0;
+        width: 100%;
+        justify-content: center;
+      }
+      #sidebar button.nav-btn {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.875rem;
+        border-radius: 12px;
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
+      #sidebar button.nav-btn.active {
+        background: #a97ebd;
+        color: white;
+      }
+      #sidebar.dark button.nav-btn.active {
+        background: #7a5a9e;
+        color: #fff;
+      }
+      #sidebar .footer {
+        display: none;
+      }
+      #logoutBtn {
+        display: none;
       }
       #main-container {
         border-radius: 0;
         box-shadow: none;
+        flex-grow: 1;
+        overflow-y: auto;
       }
       header {
         border-radius: 0;
+        height: 3.5rem;
+        padding: 0 1rem;
       }
-      main {
+      header h1 {
+        font-size: 1rem;
+      }
+      .top-right {
+        gap: 0.5rem;
+      }
+      #membersView .header-row {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+      }
+      #membersView h2 {
+        flex-grow: 1;
+        min-width: auto;
+        font-size: 1.25rem;
+      }
+      #addTaskBtn, #deleteSelectedBtn {
+        font-size: 0.8rem;
+        padding: 0.4rem 0.75rem;
+      }
+      #searchInput {
+        max-width: 100%;
+        margin-bottom: 0.75rem;
+      }
+      .table-container {
+        border-radius: 8px;
+      }
+      table {
+        font-size: 0.8rem;
+      }
+      thead th, tbody td {
+        padding: 0.4rem 0.5rem;
+      }
+      thead th:first-child, tbody td:first-child {
+        width: 2rem;
+      }
+      thead th:last-child, tbody td:last-child {
+        width: 4rem;
+      }
+
+      /* Local Storage Panel adjustments */
+      #localStorageView {
+        margin-top: 0.75rem;
         border-radius: 0;
+        padding: 1rem;
+        max-height: none;
+        flex-grow: 1;
+      }
+      #storageList {
+        max-height: 20vh;
+        font-size: 0.8rem;
+      }
+      #storageList div {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.25rem;
+        padding: 0.25rem 0.25rem;
+      }
+      #storageList .key, #storageList .value {
+        max-width: 100%;
+        white-space: normal;
+        overflow: visible;
+        text-overflow: unset;
+      }
+      #storageList button.editStorageBtn {
+        align-self: flex-end;
+        padding: 0;
+      }
+      #storageEditor {
+        margin-top: 0.75rem;
+        gap: 0.25rem;
+      }
+      #storageEditor input[type="text"],
+      #storageEditor textarea {
+        font-size: 0.875rem;
+        min-height: 2.5rem;
+      }
+      #storageEditor textarea {
+        min-height: 5rem;
+      }
+      #storageEditor .buttons {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+      }
+      #storageEditor button {
+        flex-grow: 1;
+        font-size: 0.875rem;
+        padding: 0.5rem 0;
+        justify-content: center;
       }
     }
   </style>
@@ -754,6 +1115,9 @@
       </button>
       <button id="nav-members" class="nav-btn" aria-label="Members navigation">
         <i class="fas fa-users" aria-hidden="true" style="width:20px;text-align:center;"></i> Members
+      </button>
+      <button id="nav-localstorage" class="nav-btn" aria-label="Local Storage Editor navigation">
+        <i class="fas fa-database" aria-hidden="true" style="width:20px;text-align:center;"></i> Local Storage
       </button>
       <button class="logout" id="logoutBtn" type="button" aria-label="Logout">
         <i class="fas fa-sign-out-alt" style="width:20px;"></i>
@@ -777,9 +1141,7 @@
             <i class="fas fa-chevron-down" aria-hidden="true"></i>
           </button>
           <div id="profileDropdown" role="menu" aria-orientation="vertical" aria-labelledby="profileBtn">
-            <a href="#" role="menuitem" tabindex="-1">Profile</a>
-            <a href="#" role="menuitem" tabindex="-1">Settings</a>
-            <a href="#" role="menuitem" tabindex="-1">Logout</a>
+            <a href="#" role="menuitem" tabindex="-1" id="profileLogout">Logout</a>
           </div>
         </div>
       </div>
@@ -788,7 +1150,7 @@
     <main>
       <section id="dashboardView" aria-label="Dashboard Home View">
         <h2>Dashboard</h2>
-        <p>This is your dashboard home. Use the sidebar to navigate to the Members section to manage your to-do list.</p>
+        <p>This is your dashboard home. Use the sidebar to navigate to the Members section to manage your to-do list or to the Local Storage section to view and edit local storage.</p>
       </section>
 
       <section id="membersView" aria-label="Members To-Do List" tabindex="0" style="display:none; flex-direction: column; height: 100%;">
@@ -818,6 +1180,28 @@
             <tbody id="taskTableBody"></tbody>
           </table>
         </div>
+      </section>
+
+      <section id="localStorageView" aria-label="Local Storage Editor" tabindex="0" style="display:none; flex-direction: column; height: 100%;">
+        <h2>Local Storage Editor</h2>
+        <div id="storageList" aria-live="polite" aria-relevant="additions removals" tabindex="0" role="list"></div>
+        <form id="storageEditor" aria-label="Local Storage Editor Form" novalidate>
+          <label for="storageKeyInput">Key</label>
+          <input type="text" id="storageKeyInput" name="storageKey" placeholder="Enter key" required autocomplete="off" />
+          <label for="storageValueInput">Value (JSON or plain text)</label>
+          <textarea id="storageValueInput" name="storageValue" placeholder="Enter value" required></textarea>
+          <div class="buttons">
+            <button type="submit" id="saveStorageBtn" aria-label="Save local storage item">
+              <i class="fas fa-save" aria-hidden="true"></i> Save
+            </button>
+            <button type="button" id="deleteStorageBtn" aria-label="Delete local storage item" disabled>
+              <i class="fas fa-trash-alt" aria-hidden="true"></i> Delete
+            </button>
+            <button type="button" id="clearStorageBtn" aria-label="Clear all local storage items">
+              <i class="fas fa-broom" aria-hidden="true"></i> Clear All
+            </button>
+          </div>
+        </form>
       </section>
     </main>
   </div>
@@ -869,8 +1253,10 @@
       // Elements
       const navDashboardBtn = document.getElementById("nav-dashboard");
       const navMembersBtn = document.getElementById("nav-members");
+      const navLocalStorageBtn = document.getElementById("nav-localstorage");
       const dashboardView = document.getElementById("dashboardView");
       const membersView = document.getElementById("membersView");
+      const localStorageView = document.getElementById("localStorageView");
       const greetingEl = document.getElementById("greeting");
       const darkModeToggle = document.getElementById("darkModeToggle");
       const bodyEl = document.body;
@@ -881,6 +1267,7 @@
       const profileDropdownWrapper = document.getElementById("profileDropdownWrapper");
       const userAvatar = document.getElementById("userAvatar");
       const logoutBtn = document.getElementById("logoutBtn");
+      const profileLogoutLink = document.getElementById("profileLogout");
 
       // To-Do List Elements
       const taskTableBody = document.getElementById("taskTableBody");
@@ -907,6 +1294,14 @@
       const addLoginTimeInput = document.getElementById("addLoginTime");
       const addDeadlineInput = document.getElementById("addDeadline");
 
+      // Local Storage Elements
+      const storageList = document.getElementById("storageList");
+      const storageKeyInput = document.getElementById("storageKeyInput");
+      const storageValueInput = document.getElementById("storageValueInput");
+      const saveStorageBtn = document.getElementById("saveStorageBtn");
+      const deleteStorageBtn = document.getElementById("deleteStorageBtn");
+      const clearStorageBtn = document.getElementById("clearStorageBtn");
+
       // State
       let currentUserName = "John Doe";
       let currentUserEmail = "john.doe";
@@ -914,6 +1309,9 @@
       let filteredTasks = [];
       let currentSort = { key: null, asc: true };
       let editingTaskId = null;
+
+      // Local Storage editing state
+      let editingStorageKey = null;
 
       // Utility: Generate initials from name
       function getInitials(name) {
@@ -997,6 +1395,7 @@
           profileDropdown.classList.add("dark");
           editModal.querySelector(".modal-content").classList.add("dark");
           addTaskModal.querySelector(".modal-content").classList.add("dark");
+          localStorageView.classList.add("dark");
           darkModeToggle.querySelector(".fa-moon").style.display = "none";
           darkModeToggle.querySelector(".fa-sun").style.display = "inline-block";
         } else {
@@ -1007,6 +1406,7 @@
           profileDropdown.classList.remove("dark");
           editModal.querySelector(".modal-content").classList.remove("dark");
           addTaskModal.querySelector(".modal-content").classList.remove("dark");
+          localStorageView.classList.remove("dark");
           darkModeToggle.querySelector(".fa-moon").style.display = "inline-block";
           darkModeToggle.querySelector(".fa-sun").style.display = "none";
         }
@@ -1152,7 +1552,7 @@
             editBtn.style.color = "#2a1f4a";
           });
           editBtn.addEventListener("mouseleave", () => {
-            editBtn.style.color = bodyEl.classList.contains("dark") ? "#d1c9e0" : "#3b2f6d";
+            editBtn.style.color = bodyEl.classList.contains("dark") ? "#d1e0e0" : "#3b2f6d";
           });
           editBtn.addEventListener("click", () => openEditModal(task.id));
           tdActions.appendChild(editBtn);
@@ -1167,7 +1567,7 @@
             deleteBtn.style.color = "#7a5a9e";
           });
           deleteBtn.addEventListener("mouseleave", () => {
-            deleteBtn.style.color = bodyEl.classList.contains("dark") ? "#d1c9e0" : "#a97ebd";
+            deleteBtn.style.color = bodyEl.classList.contains("dark") ? "#d1e0e0" : "#a97ebd";
           });
           deleteBtn.addEventListener("click", () => deleteTask(task.id));
           tdActions.appendChild(deleteBtn);
@@ -1315,6 +1715,7 @@
       function showModal(modal) {
         modal.classList.add("active");
         modal.setAttribute("aria-hidden", "false");
+        modal.focus();
       }
       // Hide modal
       function hideModal(modal) {
@@ -1327,19 +1728,37 @@
         if (view === "dashboard") {
           dashboardView.style.display = "block";
           membersView.style.display = "none";
+          localStorageView.style.display = "none";
           navDashboardBtn.classList.add("active");
           navDashboardBtn.setAttribute("aria-current", "page");
           navMembersBtn.classList.remove("active");
           navMembersBtn.removeAttribute("aria-current");
+          navLocalStorageBtn.classList.remove("active");
+          navLocalStorageBtn.removeAttribute("aria-current");
         } else if (view === "members") {
           dashboardView.style.display = "none";
           membersView.style.display = "flex";
+          localStorageView.style.display = "none";
           navMembersBtn.classList.add("active");
           navMembersBtn.setAttribute("aria-current", "page");
           navDashboardBtn.classList.remove("active");
           navDashboardBtn.removeAttribute("aria-current");
+          navLocalStorageBtn.classList.remove("active");
+          navLocalStorageBtn.removeAttribute("aria-current");
           renderTasks();
           updateSelectAllCheckbox();
+        } else if (view === "localstorage") {
+          dashboardView.style.display = "none";
+          membersView.style.display = "none";
+          localStorageView.style.display = "flex";
+          navLocalStorageBtn.classList.add("active");
+          navLocalStorageBtn.setAttribute("aria-current", "page");
+          navDashboardBtn.classList.remove("active");
+          navDashboardBtn.removeAttribute("aria-current");
+          navMembersBtn.classList.remove("active");
+          navMembersBtn.removeAttribute("aria-current");
+          loadLocalStorageItems();
+          resetStorageEditor();
         }
       }
 
@@ -1383,6 +1802,7 @@
         profileDropdown.classList.toggle("dark", isDark);
         editModal.querySelector(".modal-content").classList.toggle("dark", isDark);
         addTaskModal.querySelector(".modal-content").classList.toggle("dark", isDark);
+        localStorageView.classList.toggle("dark", isDark);
         if (isDark) {
           darkModeToggle.querySelector(".fa-moon").style.display = "none";
           darkModeToggle.querySelector(".fa-sun").style.display = "inline-block";
@@ -1420,7 +1840,151 @@
       function handleLogout() {
         localStorage.removeItem("status");
         localStorage.removeItem("user");
+        localStorage.removeItem("userEmail");
         window.location.href = "index.html"; // Redirect to login page
+      }
+
+      // Local Storage Editor Functions
+
+      // Load all localStorage items and render list
+      function loadLocalStorageItems() {
+        storageList.innerHTML = "";
+        if (localStorage.length === 0) {
+          const emptyDiv = document.createElement("div");
+          emptyDiv.textContent = "Local storage is empty.";
+          emptyDiv.style.textAlign = "center";
+          emptyDiv.style.padding = "1rem";
+          emptyDiv.style.color = "#a97ebd";
+          emptyDiv.style.userSelect = "none";
+          storageList.appendChild(emptyDiv);
+          deleteStorageBtn.disabled = true;
+          return;
+        }
+        // Exclude keys used by app for tasks and dark mode and user info
+        const excludeKeys = new Set(["todoTasks", "darkMode", "status", "user", "userEmail"]);
+        const keys = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (!excludeKeys.has(key)) keys.push(key);
+        }
+        if (keys.length === 0) {
+          const emptyDiv = document.createElement("div");
+          emptyDiv.textContent = "No editable local storage items found.";
+          emptyDiv.style.textAlign = "center";
+          emptyDiv.style.padding = "1rem";
+          emptyDiv.style.color = "#a97ebd";
+          emptyDiv.style.userSelect = "none";
+          storageList.appendChild(emptyDiv);
+          deleteStorageBtn.disabled = true;
+          return;
+        }
+        keys.sort((a,b) => a.localeCompare(b));
+        keys.forEach((key) => {
+          const value = localStorage.getItem(key);
+          const itemDiv = document.createElement("div");
+          itemDiv.setAttribute("role", "listitem");
+          itemDiv.tabIndex = 0;
+
+          const keySpan = document.createElement("span");
+          keySpan.className = "key";
+          keySpan.title = key;
+          keySpan.textContent = key;
+
+          const valueSpan = document.createElement("span");
+          valueSpan.className = "value";
+          let displayValue = value;
+          try {
+            const parsed = JSON.parse(value);
+            displayValue = JSON.stringify(parsed);
+          } catch {}
+          valueSpan.title = displayValue;
+          valueSpan.textContent = displayValue.length > 50 ? displayValue.slice(0, 47) + "..." : displayValue;
+
+          const editBtn = document.createElement("button");
+          editBtn.className = "editStorageBtn";
+          editBtn.setAttribute("aria-label", `Edit local storage item with key ${key}`);
+          editBtn.innerHTML = '<i class="fas fa-pen"></i>';
+          editBtn.addEventListener("click", () => {
+            storageKeyInput.value = key;
+            storageValueInput.value = value;
+            editingStorageKey = key;
+            deleteStorageBtn.disabled = false;
+            storageKeyInput.focus();
+          });
+
+          itemDiv.appendChild(keySpan);
+          itemDiv.appendChild(valueSpan);
+          itemDiv.appendChild(editBtn);
+
+          storageList.appendChild(itemDiv);
+        });
+        deleteStorageBtn.disabled = true;
+      }
+
+      // Reset storage editor inputs and state
+      function resetStorageEditor() {
+        storageKeyInput.value = "";
+        storageValueInput.value = "";
+        editingStorageKey = null;
+        deleteStorageBtn.disabled = true;
+      }
+
+      // Save or update localStorage item
+      function saveStorageItem(e) {
+        e.preventDefault();
+        const key = storageKeyInput.value.trim();
+        let value = storageValueInput.value;
+
+        if (!key) {
+          alert("Key cannot be empty.");
+          storageKeyInput.focus();
+          return;
+        }
+
+        // Prevent overwriting app keys
+        const reservedKeys = new Set(["todoTasks", "darkMode", "status", "user", "userEmail"]);
+        if (reservedKeys.has(key)) {
+          alert(`The key "${key}" is reserved and cannot be edited here.`);
+          storageKeyInput.focus();
+          return;
+        }
+
+        // Try to parse JSON to validate, but store as string anyway
+        try {
+          JSON.parse(value);
+        } catch {
+          // Not JSON, store as plain string
+        }
+
+        localStorage.setItem(key, value);
+        loadLocalStorageItems();
+        resetStorageEditor();
+      }
+
+      // Delete current localStorage key
+      function deleteStorageItem() {
+        if (!editingStorageKey) return;
+        if (confirm(`Are you sure you want to delete the key "${editingStorageKey}"?`)) {
+          localStorage.removeItem(editingStorageKey);
+          loadLocalStorageItems();
+          resetStorageEditor();
+        }
+      }
+
+      // Clear all localStorage except app keys
+      function clearAllLocalStorage() {
+        if (localStorage.length === 0) return;
+        if (confirm("Are you sure you want to clear all local storage except app data? This action cannot be undone.")) {
+          const keysToKeep = new Set(["todoTasks", "darkMode", "status", "user", "userEmail"]);
+          const keysToRemove = [];
+          for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (!keysToKeep.has(key)) keysToRemove.push(key);
+          }
+          keysToRemove.forEach(k => localStorage.removeItem(k));
+          loadLocalStorageItems();
+          resetStorageEditor();
+        }
       }
 
       // Initialization
@@ -1449,11 +2013,18 @@
         // Event listeners
         navDashboardBtn.addEventListener("click", () => switchView("dashboard"));
         navMembersBtn.addEventListener("click", () => switchView("members"));
+        navLocalStorageBtn.addEventListener("click", () => switchView("localstorage"));
 
         darkModeToggle.addEventListener("click", toggleDarkMode);
 
         profileBtn.addEventListener("click", toggleProfileDropdown);
         document.addEventListener("click", closeProfileDropdownOnClickOutside);
+
+        // Link logout in profile dropdown to logout function
+        profileLogoutLink.addEventListener("click", (e) => {
+          e.preventDefault();
+          handleLogout();
+        });
 
         selectAllCheckbox.addEventListener("change", (e) =>
           toggleSelectAll(e.target.checked)
@@ -1489,6 +2060,19 @@
               sortTasksBy(key);
             }
           });
+        });
+
+        // Local Storage Editor event listeners
+        saveStorageBtn.addEventListener("click", saveStorageItem);
+        deleteStorageBtn.addEventListener("click", deleteStorageItem);
+        clearStorageBtn.addEventListener("click", clearAllLocalStorage);
+
+        // Reset delete button if key input changes
+        storageKeyInput.addEventListener("input", () => {
+          if (editingStorageKey && storageKeyInput.value.trim() !== editingStorageKey) {
+            deleteStorageBtn.disabled = true;
+            editingStorageKey = null;
+          }
         });
 
         // Initial render tasks if members view is active
